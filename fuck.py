@@ -1,3 +1,8 @@
+
+
+#python fuck.py risksurvice_questionare.csv
+
+
 import csv
 import sys
 import xml.etree.ElementTree as ET
@@ -27,10 +32,15 @@ if __name__ == '__main__':
 		SubElement(patientPerson, "id", {'extention':"1"})
 		SubElement(patientPerson, "adminsitrativeGenderCode", {'code':"F"})
 		
+		subject_1 = SubElement(patient, "subjectOf1", {'typeCode':"SBJ"})
+		living_age = SubElement(subject_1, "livingEstimatedAge", {'code':"21611-9"})
+		code = SubElement(living_age, "code", {'code':"21611-9", 'displayName':"ESTIMATED AGE", 'codeSystemName':"LOINC"})
+		value = SubElement(living_age, "value", {'value':"49"})
+		
 		rough_string = ET.tostring(root, 'utf-8')
 		reparsed = MD.parseString(rough_string)
 		print reparsed.toprettyxml(indent="\t")
-		
+        
 		for information in row:
 			category = information.split(',')
 			for elem in category:
