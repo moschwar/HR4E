@@ -8,7 +8,14 @@ from xml.etree.ElementTree import Element, SubElement
 from datetime import date
 from suds.client import Client
 
-
+#-----------------------------------------------------------------------------------------
+# pancreaticCancer() and endometrialCancer() are sample functions we created. These type
+# of functions can be used in the future when the csv questionnaire properly translates
+# to features that can be fully interpreted by Bayes Mendel Risk Assessment. By calling one
+# of these functions in the main function, it will append an xml subtree the tree
+# in the main method. It uses the element tree module; the documentation can be found here:
+# https://docs.python.org/2/library/xml.etree.elementtree.html
+#-----------------------------------------------------------------------------------------
 
 def pancreaticCancer(root):
 	clinicObs = SubElement(root, "clinicalObservation", {'classCode':"OBS", 'moodCode': "EVN"})
@@ -20,7 +27,6 @@ def pancreaticCancer(root):
 	SubElement(value, "low", {'value':"55"})
 	SubElement(value, "high", {'value':"55"})
 	
-
 def endometrialCancer(root):
 	clinicObs = SubElement(root, "clinicalObservation", {'classCode':"OBS", 'moodCode': "EVN"})
 	SubElement(clinicObs, "code", {'code':"371973000", 'codeSystemName':"SNOMED CT", 'displayName':"Uterine Cancer"})
@@ -31,7 +37,10 @@ def endometrialCancer(root):
 	SubElement(value, "low", {'value':"62"})
 	SubElement(value, "high", {'value':"62"})
 	
-
+# function returns age when birthdate is passed in. my not work for corner cases
+# such as age 104 and age 4 (2014 or 1914)
+# a proper function would involve having the full year -> 2/22/2014 instead of 2/22/14
+# provided in the csv.
 
 def get_age(birthdate):
 	today = date.today()
@@ -56,8 +65,8 @@ def get_age(birthdate):
 		
 	return age
 	
+#main function
 	
-
 if __name__ == '__main__':
 
 	f = csv.reader(open(sys.argv[1], "rU"), dialect=csv.excel_tab)
@@ -65,8 +74,12 @@ if __name__ == '__main__':
 	
 	#every row in f is a list of each category
 	for row in f: 
-		#we are examining every category in one person's list
-		#print "new person:"
+		#we are examining every category in one person's list by looking at the entire row
+		
+		#----------------------------------------------------------------
+		#we create a base xml structure in which subtrees can be appended
+		#utilises element tree module
+		#----------------------------------------------------------------
 		
 		root = Element("FamilyHistory", {'classCode':"OBS", 'moodCode':"EVN"})
 		#SubElement(root, "id", {'root':"test", 'extension':"test2", 'assigningAthorityName':"HR4E"})
@@ -80,28 +93,35 @@ if __name__ == '__main__':
 		patientPerson = SubElement(patient, "patientPerson", {'classCode':"PSN", 'determinerCode':"INSTANCE"})
 		SubElement(patientPerson, "id", {'extension':"1"})
 		
-		#rough_string = ET.tostring(root, 'utf-8')
-		#reparsed = MD.parseString(rough_string)
-		#print reparsed.toprettyxml(indent="\t")
-		
-		#tree_node = Element("root")
         
 		for information in row:
+			#examine each column
+			#each index in category is a different column.
 			category = information.split(',')
+			
 			#print category
 			#print category[7]
-			
 			
 			age = get_age(category[7])
 			#print age
 			
+			#append age information to main tree
 			subject_1 = SubElement(patient, "subjectOf1", {'typeCode':"SBJ"})
 			living_age = SubElement(subject_1, "livingEstimatedAge", {'classCode':"OBS", 'moodCode':"EVN"})
 			code = SubElement(living_age, "code", {'code':"21611-9", 'displayName':"ESTIMATED AGE", 'codeSystemName':"LOINC"})
 			value = SubElement(living_age, "value", {'value':str(age)})
 			
-			#--------------------Disease part--------------------
-				
+			#--------------------Diseases--------------------
+			#once a proper csv questionnaire file is created,
+			#every column can have information that builds up
+			#the main xml tree. every index corresponds to 
+			#each row. By checking the information, we can know
+			#the proper subtree to append and grow our main tree.
+			#The main tree will be sent to the risk assessment.
+			#Some sample code for pancreatic cancer and endometrial
+			#cancer is provided.
+			#------------------------------------------------
+							
 			#if category[18] == "Yes":
 				#The person has had ovarian cancer
 			#else:
@@ -171,13 +191,20 @@ if __name__ == '__main__':
 			#for elem in category:
 				#print elem
 				
+				
+		#we take the element tree and transform it into a string
 		rough_string = ET.tostring(root, 'utf-8')
 		reparsed = MD.parseString(rough_string)
+		
+		#we turn the string into "pretty" format
 		pretty = reparsed.toprettyxml(indent="\t", encoding="utf-8")
 		#print pretty
 		
 		outfile = open("sample_output.txt", 'w')
 		
+		#--------------------------------------------------------
+		#use suds library to post to the risk assessment service.
+		#--------------------------------------------------------
 		url = 'http://bayesmendel.dfci.harvard.edu:8080/RiskService/services/Converter?wsdl'
 		client = Client(url)
 		result = client.service.getRiskHL7(pretty, 'fd319f62-eafe-4728-90f3-b9423e1178e3', False, False)
