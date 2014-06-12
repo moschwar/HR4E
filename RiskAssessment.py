@@ -200,18 +200,34 @@ if __name__ == '__main__':
 		pretty = reparsed.toprettyxml(indent="\t", encoding="utf-8")
 		#print pretty
 		
-		outfile = open("sample_output.txt", 'w')
 		
 		#--------------------------------------------------------
 		#use suds library to post to the risk assessment service.
 		#--------------------------------------------------------
-		url = 'http://bayesmendel.dfci.harvard.edu:8080/RiskService/services/Converter?wsdl'
-		client = Client(url)
-		result = client.service.getRiskHL7(pretty, 'fd319f62-eafe-4728-90f3-b9423e1178e3', False, False)
-		print>>outfile, result
-		print>>outfile, "\n"
-		
-		#the string result is the output xml code
+        	url = 'http://bayesmendel.dfci.harvard.edu:8080/RiskService/services/Converter?wsdl'
+        	client = Client(url)
+        	result = client.service.getRiskHL7(pretty, 'fd319f62-eafe-4728-90f3-b9423e1178e3', False, False)
+        	#--------------------------------------------------------
+        	#This creates a new CSV with the XML string appended for each patient in a new column.
+        	#--------------------------------------------------------
+		with open(sys.argv[1],'rU') as input:
+            		with open('riskservice_questionnaire_output.csv','w') as output:
+                		writer = csv.writer(output,lineterminator='\n')
+        			reader = csv.reader(input)
+            
+                		all = []
+                		row = next(reader)
+                		row.append('Risk Assessment Output')
+                		all.append(row)
+                		for row in reader:
+                    			row.append(result)
+                    			all.append(row)
+                
+                		writer.writerows(all)
+            
+        
+        	input.close()
+        	output.close()
 
 
 		
