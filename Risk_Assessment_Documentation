@@ -1,0 +1,23 @@
+Go to a python command line, type “python RiskAssesmentBackEnd.py [questionnaire.csv]”
+For the project-test, type “python project-test.py [questionnaire.csv]
+
+def endometrialCancer(root):
+	
+** This gets the information about pancreatic cancer in the CSV, adding it to a element tree which is then added to the larger parent tree of the whole XML file.
+	A SubElement is a child of a parent in our trees. 
+
+
+def pancreaticCancer(root):
+
+	** This gets the information about pancreatic cancer in the CSV, adding it to a element tree which is then added to the larger parent tree of the whole XML file.
+	A SubElement is a child of a parent in our trees. 
+
+
+def get_age(birthdate):
+
+**Gets the birthdate input from the user (formatted like 1/1/83) and separates it out to separate numbers in an array.  The elements in the array (of size three) are in order of: month, day, and year. Year is only the last two digits of the actual birth year. Because they only input the last two digits, we have to assume that people filling out the questionnaire are less than 100 years old. If someone inputs “2/9/10,” we have to assume that they were born in 2010, not 1910.
+
+
+if __name__ == '__main__':
+    
+    ** This transforms the given CSV file into HL7 XML for the Bayes Mendel Calculator, which it then sends to Bayes Mendel, and has an XML string with risk assessment data appended. The program then appends that XML into the original CSV file for each patient.
