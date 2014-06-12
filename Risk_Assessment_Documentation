@@ -1,3 +1,9 @@
+IN ORDER TO RUN THIS: You must have suds installed on your computer for your python command line.
+Download link: https://pypi.python.org/pypi/suds
+Instructions on installation: https://bitbucket.org/jurko/suds
+
+Once this is installed you will be able to compile the program.
+
 Go to a python command line, type “python RiskAssesmentBackEnd.py [questionnaire.csv]”
 For the project-test, type “python project-test.py [questionnaire.csv]
 
